@@ -1,0 +1,29 @@
+# Operating-system files
+.DS_Store
+
+# Protein structure files
+*.pdb
+*.PDB
+*.cif
+*.CIF
+
+# RStudio project/session files
+.Rproj.user/
+*.Rhistory
+*.RData
+*.Ruserdata
+*.RDataTmp*
+*.Rproj
+.Rapp.history
+
+# Preserved but intentionally untracked assets
+archive_unused/
+
+# Common generated R output/log files
+*.Rout
+*.html
+*.log
+
+# Local/editor files
+.vscode/
+.idea/

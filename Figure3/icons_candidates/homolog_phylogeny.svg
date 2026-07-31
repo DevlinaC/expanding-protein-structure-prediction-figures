@@ -1,0 +1,75 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="762" height="558"
+     viewBox="0 0 762 558" role="img"
+     aria-labelledby="title description">
+  <title id="title">Phylogeny of homologous proteins</title>
+  <desc id="description">
+    A rooted, acyclic phylogenetic tree whose terminal homologs form blue and
+    orange clades associated with different conformational states.
+  </desc>
+  <metadata>
+    Created as a phylogenetic-tree counterpart to the homolog network supplied
+    for Figure 3. Vector paths are intentionally simple for editing and reuse.
+  </metadata>
+
+  <defs>
+    <style>
+      .branch {
+        fill: none;
+        stroke: #4D4D4D;
+        stroke-width: 8;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+      }
+      .root-mark { fill: #4D4D4D; }
+      .tip {
+        stroke: #FFFFFF;
+        stroke-width: 5;
+      }
+      .blue-dark { fill: #3E4A89; }
+      .blue      { fill: #5B6FB0; }
+      .blue-light{ fill: #8EA2D5; }
+      .orange-dark { fill: #D96D42; }
+      .orange      { fill: #FD8D62; }
+      .orange-light{ fill: #F5B08E; }
+    </style>
+  </defs>
+
+  <!-- Root and trunk -->
+  <circle class="root-mark" cx="68" cy="279" r="11"/>
+  <path class="branch" d="M68 279 H190"/>
+
+  <!-- First split: two clades -->
+  <path class="branch" d="M190 279 L292 153"/>
+  <path class="branch" d="M190 279 L292 405"/>
+
+  <!-- Blue clade -->
+  <path class="branch" d="M292 153 L397 88"/>
+  <path class="branch" d="M292 153 L397 199"/>
+  <path class="branch" d="M397 88 L536 58"/>
+  <path class="branch" d="M397 88 L536 116"/>
+  <path class="branch" d="M397 199 L536 176"/>
+  <path class="branch" d="M397 199 L536 231"/>
+
+  <!-- Orange clade -->
+  <path class="branch" d="M292 405 L397 342"/>
+  <path class="branch" d="M292 405 L397 470"/>
+  <path class="branch" d="M397 342 L536 319"/>
+  <path class="branch" d="M397 342 L536 377"/>
+  <path class="branch" d="M397 470 L536 441"/>
+  <path class="branch" d="M397 470 L536 500"/>
+
+  <!-- Terminal homologs; color encodes the associated structural state -->
+  <g aria-label="blue clade tips">
+    <circle class="tip blue-dark"  cx="566" cy="58"  r="28"/>
+    <circle class="tip blue"       cx="566" cy="116" r="28"/>
+    <circle class="tip blue-light" cx="566" cy="176" r="28"/>
+    <circle class="tip blue-dark"  cx="566" cy="231" r="28"/>
+  </g>
+
+  <g aria-label="orange clade tips">
+    <circle class="tip orange-dark"  cx="566" cy="319" r="28"/>
+    <circle class="tip orange"       cx="566" cy="377" r="28"/>
+    <circle class="tip orange-light" cx="566" cy="441" r="28"/>
+    <circle class="tip orange-dark"  cx="566" cy="500" r="28"/>
+  </g>
+</svg>

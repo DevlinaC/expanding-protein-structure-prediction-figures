@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg"
+     width="128"
+     height="128"
+     viewBox="0 0 128 128"
+     role="img"
+     aria-labelledby="title description">
+  <title id="title">pH context icon</title>
+  <description id="description">
+    A purple liquid droplet containing the letters pH, accompanied by three
+    small circular bubbles. Original artwork created for the Figure 1 schematic.
+  </description>
+
+  <!-- Small bubbles -->
+  <circle cx="29" cy="29" r="4.5" fill="#8E63B0"/>
+  <circle cx="21" cy="43" r="3.2" fill="#8E63B0"/>
+  <circle cx="94" cy="26" r="5.2" fill="none" stroke="#704694" stroke-width="3"/>
+
+  <!-- Droplet -->
+  <path d="M64 17
+           C58 28 36 49 34 69
+           C32 89 45 106 64 108
+           C83 106 96 89 94 69
+           C92 49 70 28 64 17 Z"
+        fill="#8E63B0"
+        stroke="#704694"
+        stroke-width="2.5"
+        stroke-linejoin="round"/>
+
+  <!-- Label -->
+  <text x="64"
+        y="80"
+        text-anchor="middle"
+        font-family="Arial, Helvetica, sans-serif"
+        font-size="31"
+        font-weight="700"
+        fill="#FFFFFF">pH</text>
+</svg>
