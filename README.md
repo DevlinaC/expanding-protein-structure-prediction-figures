@@ -83,7 +83,6 @@ The initial figure scripts and source assets in this repository were prepared by
 
 - Keep source assets and scripts in their corresponding figure directory.
 - Treat rendered files as outputs of the scripts when a script is available.
-- Preserve the project files (`.Rproj`) so collaborators can open the figures directly in RStudio.
 - Large structure files are intentionally excluded from version control; obtain or store them separately as needed.
 
 ## Citation
