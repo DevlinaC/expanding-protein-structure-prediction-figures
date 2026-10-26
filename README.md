@@ -131,7 +131,7 @@ For the simple line icons derived from the Phosphor icon set, also credit [Phosp
 
 Protein structure illustrations were generated using the [PDB2Vector tool](https://bioicons.com/pdb2vector/), developed by Simon Dür. Suggested citation:
 
-> Protein structure illustrations were generated using the PDB2Vector tool (https://bioicons.com/pdb2vector/), developed by Simon Dür.
+> Protein structure illustrations were generated using the PDB2Vector tool (<https://bioicons.com/pdb2vector/>), developed by Simon Dür.
 
 ## License
 
