@@ -1,11 +1,11 @@
 # =============================================================================
-# Figure 3: cartoon-style guidance for structure prediction
+# Figure 3: complementary views of conformational state space
 #
-# Four stages are arranged left-to-right beneath the evidence bar:
-#   1. Dominant model
-#   2. Alternative states
-#   3. Physical testing
-#   4. Experimental evidence
+# Four complementary approaches are arranged as parallel panels:
+#   1. Representative structure prediction
+#   2. Candidate-state generation
+#   3. Energetic and kinetic estimation
+#   4. Experimental constraints and tests
 #
 # The script keeps text to short stage labels and uses SVG cartoons
 # to communicate the biological triggers represented as text in v5.
@@ -22,7 +22,7 @@
 #   icons_candidates/TestTubeRack0001-red.svg
 #
 # OUTPUTS
-#   figure_versions/Figure3_cartoon_v6.{png,pdf}
+#   figure_versions/Figure3_cartoon_v6.{png,pdf,tiff}
 #
 # REQUIRED R PACKAGES
 #   ggplot2, magick, and rsvg. `grid` is included with R.
@@ -64,10 +64,10 @@ icon <- function(filename) file.path(icons_dir, filename)
 
 # ---- Palette -------------------------------------------------
 tier_fill <- c(
-  "#8FBFA5", # fast / dominant-state model
-  "#E9C46A", # alternative-state hypotheses
-  "#E8925A", # physical plausibility
-  "#C1666B"  # population and mechanism evidence
+  "#8FBFA5", # representative structure prediction
+  "#E9C46A", # candidate-state generation
+  "#E8925A", # energetic and kinetic estimation
+  "#C1666B"  # experimental constraints and tests
 )
 
 tier_dark <- c(
@@ -141,10 +141,10 @@ cards <- data.frame(
   fill = tier_fill,
   dark = tier_dark,
   label = c(
-    "Single struture prediction",
-    "Alternative state sampling",
-    "Energetic refinement",
-    "Experiments"
+    "Representative\nstructure prediction",
+    "Candidate-state\ngeneration",
+    "Energetic and\nkinetic estimation",
+    "Experimental\nconstraints and tests"
   )
 )
 
@@ -165,27 +165,18 @@ p <- ggplot() +
   geom_text(
     data = cards,
     aes(x = x, y = 7.19, label = label),
-    colour = "white", fontface = "bold", size = 6.2,
-    family = "sans"
-  ) +
-  # light arrows show escalation without implying strict exclusivity
-  annotate(
-    "segment",
-    x = cards$xmax[-4] + 0.10,
-    xend = cards$xmin[-1] - 0.10,
-    y = 4.25, yend = 4.25,
-    colour = "#9A9A9A", linewidth = 0.9,
-    arrow = arrow(type = "closed", length = unit(2.5, "mm"))
+    colour = "white", fontface = "bold", size = 6.8,
+    lineheight = 0.92, family = "sans"
   )
 
-# ---- Top organizing axis: fast/approximate -> rigorous/experimental
+# ---- Shared organizing label: no completeness hierarchy ------
 n_grad <- 500
 grad_cols <- colorRampPalette(tier_fill)(n_grad)
-grad_x <- seq(0.55, 15.6, length.out = n_grad + 1)
+grad_x <- seq(0.55, 15.45, length.out = n_grad + 1)
 
 gradient_df <- data.frame(
   xmin = grad_x[-length(grad_x)],
-  xmax = grad_x[-1]+0.06,
+  xmax = grad_x[-1] + 0.02,
   fill = grad_cols
 )
 
@@ -198,40 +189,9 @@ p <- p +
   ) +
   scale_fill_identity() +
   annotate(
-    "segment",
-    x = 0.55, xend = 15.53, y = 8.66, yend = 8.66,
-    colour = "transparent",
-    arrow = arrow(type = "closed", length = unit(3.2, "mm"))
-  ) +
-  annotate(
-    "text", x = 0.55, y = 9.12,
-    label = "PARTIAL REPRESENTATION",
-    hjust = 0, fontface = "bold", size = 4.4, colour = tier_dark[1]
-  ) +
-  annotate(
-    "text", x = 15.45+0.15, y = 9.12,
-    label = "MORE COMPLETE REPRESENTATION",
-    hjust = 1, fontface = "bold", size = 4.4, colour = tier_dark[4]
-  ) +
-  annotate(
-    "text", x = 2.2, y = 8.66,
-    label = "COORDINATES",
-    fontface = "bold", size = 6.4, colour = "white"
-  )+
-  annotate(
-    "text", x = 6.1, y = 8.66,
-    label = "+MULTIPLE STATES",
-    fontface = "bold", size = 6.4, colour = "white"
-  )+
-  annotate(
-    "text", x = 10.0, y = 8.66,
-    label = "+ENERGETICS",
-    fontface = "bold", size = 6.4, colour = "white"
-  )+
-  annotate(
-    "text", x = 13.9, y = 8.66,
-    label = "+VALIDATED MECHANISMS",
-    fontface = "bold", size = 6.4, colour = "white"
+    "text", x = 8.0, y = 8.66,
+    label = "COMPLEMENTARY INFORMATION",
+    fontface = "bold", size = 7.0, colour = "white"
   )
 
 # ---- Stage 1: dominant basin / one likely state --------------
@@ -248,13 +208,18 @@ p <- p +
   ) +
   annotate(
     "text", x = 2.20, y = 3.3,
-    label = "Coordinates", fontface = "bold",
-    size = 5.8, colour = tier_dark[1]
+    label = "One representative\nstructure", fontface = "bold",
+    lineheight = 0.95, size = 6.2, colour = tier_dark[1]
+  ) +
+  annotate(
+    "text", x = 2.20, y = 2.55,
+    label = "Confidence\ndoes not imply\noccupancy",
+    fontface = "italic", size = 6.0, lineheight = 0.90, colour = ink
   ) +
  annotate(
-  "text", x = 2.20, y = 1.90,
-  label = "Methods:\nAlphaFold2,3\nOpenFold2,3\nRoseTTAFold\nESMFold2", fontface = "bold",
-  size = 5, colour = tier_dark[1]
+  "text", x = 2.20, y = 1.62,
+  label = "Examples:\nAlphaFold 2/3\nRoseTTAFold · ESMFold", fontface = "bold",
+  size = 4.8, colour = tier_dark[1]
 )
 
 p <- add_svg(
@@ -273,7 +238,7 @@ p <- p +
   annotate(
     "text", x = 6.10, y = 4.65,
     label = "Divergent homologs", fontface = "bold",
-    size = 3.5, colour = tier_dark[2]
+    size = 4.5, colour = tier_dark[2]
   )
 p <- add_svg(
   p, icon("CTD_beta_vectorized.svg"),
@@ -321,15 +286,20 @@ drop <- data.frame(
 p <- p +
   annotate(
       "text", x = 6.10, y = 3.3,
-      label = "Accessible states", fontface = "bold",
-      size = 5.8, colour = tier_dark[2]
+      label = "Candidate states", fontface = "bold",
+      size = 6.2, colour = tier_dark[2]
+    ) +
+  annotate(
+      "text", x = 6.10, y = 2.55,
+      label = "Sampling does\nnot establish\naccessibility",
+      fontface = "italic", size = 6.0, lineheight = 0.90, colour = ink
     )
 
 p <- p+
   annotate(
-    "text", x = 6.10, y = 1.90,
-    label = "Methods:\nCF-random\nMSA subsampling\nAFSample2,3\nAFCluster", fontface = "bold",
-    size = 5, colour = tier_dark[2]
+    "text", x = 6.10, y = 1.62,
+    label = "Examples:\nMSA perturbation\nAF-Cluster · Cfold", fontface = "bold",
+    size = 4.8, colour = tier_dark[2]
   )
 
 # ---- Stage 3: stability, barriers and timescale --------------
@@ -347,6 +317,11 @@ landscape_spline <- spline(
 landscape <- data.frame(x = landscape_spline$x, y = landscape_spline$y)
 
 p <- p +
+  annotate(
+    "text", x = 10.00, y = 6.28,
+    label = "Illustrative\nrelative weights\n(condition dependent)",
+    fontface = "italic", size = 6.0, lineheight = 0.90, colour = ink
+  ) +
   geom_path(
     data = landscape, aes(x, y),
     colour = tier_dark[3], linewidth = 1.6,
@@ -361,14 +336,14 @@ p <- p +
 p <- p +
   annotate(
     "text", x = 9.23, y = 3.8,
-    label = "40%", fontface = "bold",
-    size = 4.4, colour = "black")
+    label = "p[A]", parse = TRUE, fontface = "bold",
+    size = 5.4, colour = "black")
 
 p <- p +
   annotate(
     "text", x = 10.63, y = 3.8,
-    label = "60%", fontface = "bold",
-    size = 4.4, colour = "black")
+    label = "p[B]", parse = TRUE, fontface = "bold",
+    size = 5.4, colour = "black")
 
 p <- add_svg(
   p, icon("CTD_alpha_vectorized.svg"),
@@ -399,14 +374,19 @@ p <- add_svg(
 p <- p +
   annotate(
     "text", x = 10.00, y = 3.3,
-    label = "Populations", fontface = "bold",
-    size = 5.8, colour = tier_dark[3]
+    label = "Model-dependent weights\nand rates", fontface = "bold",
+    lineheight = 0.95, size = 5.5, colour = tier_dark[3]
+  ) +
+  annotate(
+    "text", x = 10.00, y = 2.55,
+    label = "Model,\nforce-field, and\nsampling dependent",
+    fontface = "italic", size = 6.0, lineheight = 0.90, colour = ink
   )
 p <- p+
   annotate(
-    "text", x = 10.00, y = 1.90,
-    label = "Methods:\nBioEmu\nAF2-RAVE\nMulti-Basin SBMs\n REMD", fontface = "bold",
-    size = 5, colour = tier_dark[3]
+    "text", x = 10.00, y = 1.62,
+    label = "Examples:\nMD and enhanced sampling\nAF2-RAVE · BioEmu", fontface = "bold",
+    size = 4.8, colour = tier_dark[3]
   )
 
 # ---- Stage 4: populations, transient states and experiments --
@@ -456,97 +436,41 @@ p <- p +
 p <- p +
   annotate(
     "text", x = 13.90, y = 3.3,
-    label = "Mechanisms", fontface = "bold",
-    size = 5.8, colour = tier_dark[4]
+    label = "Experimentally constrained\ninterpretation", fontface = "bold",
+    lineheight = 0.95, size = 5.5, colour = tier_dark[4]
+  ) +
+  annotate(
+    "text", x = 13.90, y = 2.45,
+    label = "Averaged and\npotentially\nnon-unique",
+    fontface = "italic", size = 6.0, lineheight = 0.90, colour = ink
   )
 
 p <- p+
   annotate(
-    "text", x = 13.90, y = 1.90,
-    label = "Methods:\nNMR\nHDX-MS\nCryo-EM\nDEER", fontface = "bold",
-    size = 5, colour = tier_dark[4]
+    "text", x = 13.90, y = 1.62,
+    label = "Examples:\nNMR · smFRET/DEER\nHDX-MS", fontface = "bold",
+    size = 4.8, colour = tier_dark[4]
   )
 
-# ---- Bottom Arrow -------------------------------------------
-
-gradient_ribbon_arrow <- function(x_start = 6, x_end = 15, y = 1,
-                                  col_start = "#E9C46A",
-                                  col_end   = "#C1666B",
-                                  n = 160,
-                                  shaft_width = 12,
-                                  head_length = 0.50,
-                                  head_height = 0.18) {
-  # Build many short segments so the shaft looks like a smooth ribbon
-  xs <- seq(x_start, x_end, length.out = n + 1)
-  
-  segs <- data.frame(
-    x    = xs[-length(xs)],
-    xend = xs[-1],
-    y    = y,
-    yend = y,
-    t    = seq(0, 1, length.out = n)
-  )
-  
-p <- p+
-    geom_segment(
-      data = segs,
-      aes(x = x, y = y, xend = xend, yend = yend, colour = t),
-      linewidth = shaft_width,
-      lineend = "round"
-    ) +
-    annotate(
-      "polygon",
-      x = c(x_end, x_end - head_length, x_end - head_length),
-      y = c(y, y + head_height, y - head_height),
-      fill = col_end,
-      colour = col_end
-    ) +
-    scale_colour_gradient(
-      low = col_start,
-      high = col_end,
-      guide = "none"
-    ) +
-    coord_cartesian(
-      xlim = c(x_start - 1.5, x_end + 0.8),
-      ylim = c(y - 0.6, y + 0.6),
-      expand = FALSE
-    ) +
-    theme_void()
-}
-
-p <- gradient_ribbon_arrow(
-  x_start = 4.5, x_end = 15.5, y = 0.6,
-  col_start = "#E9C46A",
-  col_end = "#C1666B"
-) +
+# ---- Shared interpretation line -----------------------------
+p <- p +
   annotate(
-    "text",
-    x = 2.2, y = 0.6,
-    label = "CURRENT",
-    colour = "#3F7D5F",
-    fontface = "bold",
-    size = 7
-  )+
-  annotate(
-    "text",
-    x = 10.0, y = 0.6,
-    label = "FUTURE",
-    colour = "WHITE",
-    fontface = "bold",
-    size = 7
+    "text", x = 8.0, y = 0.60,
+    label = "Joint interpretation is required for landscape inference",
+    colour = ink, fontface = "bold", size = 6.0
   )
 
 
 # ---- Final styling -------------------------------------------
 p <- p +
-  coord_cartesian(xlim = c(0.25, 15.75), ylim = c(0.65, 10.15),
+  coord_cartesian(xlim = c(0.25, 15.75), ylim = c(0.25, 9.30),
                   clip = "off", expand = FALSE) +
-  labs(title = "Methods for Characterizing Conformational State Spaces") +
+  labs(title = "Complementary views of protein conformational state space") +
   theme_void(base_family = "sans") +
   theme(
     plot.background = element_rect(fill = "white", colour = NA),
     plot.title = element_text(
-      face = "bold", size = 22, hjust = 0.5,
+      face = "bold", size = 23, hjust = 0.5,
       colour = "#222222", margin = margin(b = 12)
     ),
     plot.margin = margin(18, 24, 20, 24)
@@ -555,9 +479,12 @@ p <- p +
 # ---- Export --------------------------------------------------
 png_file <- file.path(output_dir, "Figure3_cartoon_v6.png")
 pdf_file <- file.path(output_dir, "Figure3_cartoon_v6.pdf")
+tiff_file <- file.path(output_dir, "Figure3_cartoon_v6.tiff")
 
 ggsave(png_file, p, width = 16, height = 10.2, dpi = 300, bg = "white")
 ggsave(pdf_file, p, width = 16, height = 10.2, bg = "white",
        device = grDevices::pdf)
+ggsave(tiff_file, p, width = 16, height = 10.2, dpi = 300, bg = "white",
+       device = "tiff", compression = "lzw")
 
-message("Saved:\n  ", png_file, "\n  ", pdf_file)
+message("Saved:\n  ", png_file, "\n  ", pdf_file, "\n  ", tiff_file)

@@ -1,12 +1,13 @@
 #!/usr/bin/env Rscript
 
 # =============================================================================
-# Figure 4: Toward state-space protein structure prediction
+# Figure 4: Proposed framework for conformational state-space inference
 #
 # PURPOSE
-#   Rebuild figure draft as a reproducible portrait roadmap.
-#   The target is a conformational state space surrounded by six interlocking
-#   components connected by labeled, clockwise data-flow arrows.
+#   Rebuild Figure 4 as a reproducible portrait framework. The central target
+#   is state-space inference with uncertainty. Six research components inform
+#   that target iteratively; selected outer links show specific feedback rather
+#   than a required sequence of operations.
 #
 # INPUTS
 #   Layout reference (not read by the script):
@@ -17,7 +18,6 @@
 #     ../parts_fig4/state_structures/CTD_beta_vectorized.svg
 #     ../parts_fig4/state_structures/IDP_part1.svg
 #     ../parts_fig4/state_structures/IDP_part3.svg
-#     ../parts_fig4/context_icons/128WellPlateTop0001_perturbation.svg
 #     ../parts_fig4/context_icons/ph.svg
 #
 # OUTPUTS
@@ -44,11 +44,11 @@
 #   Most revisions should require editing only one of these locations:
 #     Global appearance     FIG_*, FONT_FAMILY, *_SIZE, MODULE_ALPHA and COL
 #     Ellipse text/layout   modules
-#     Cycle arrows/labels   links
+#     Central spokes       spokes
+#     Feedback arrows      links
 #     Ellipse icons         draw_module_icon()
 #     Central state space   draw_state_space_card()
-#     Bottom text/layout    draw_contribution_strip()
-#     Bottom icons          draw_contribution_icon()
+#     Arrow legend          draw_relationship_legend()
 #     Output file name      OUTPUT_STEM
 #
 # LAYOUT CONVENTIONS
@@ -58,8 +58,8 @@
 #     convert it into a consistent, slightly horizontal ellipse.
 #   - Use "\n" inside a label to control line breaks explicitly.
 #   - All six roadmap ellipses intentionally share one base size.
-#   - Cycle arrows intentionally stop short of the ellipses by a uniform gap.
-#     If modules move, update both the arrow endpoints and label coordinates.
+#   - Relationship arrows intentionally stop short of the ellipses and central
+#     card. If modules move, update arrow endpoints and label coordinates.
 #
 # SAFE REVISION WORKFLOW
 #   1. Change one section at a time.
@@ -172,7 +172,7 @@ resolve_script_path <- function(filename) {
   )
 }
 
-script_path <- resolve_script_path("figure4_roadmap_v2.R")
+script_path <- resolve_script_path("roadmap_figure4.R")
 script_dir <- dirname(script_path)
 
 figure_dir <- normalizePath(file.path(script_dir, ".."), mustWork = TRUE)
@@ -200,8 +200,7 @@ FIG_WIDTH <- 7.2
 FIG_HEIGHT <- 7.8
 FONT_FAMILY <- "Helvetica"
 MODULE_ALPHA <- 0.90
-FLOW_LABEL_SIZE <- 9.5
-CONTRIBUTION_TEXT_SIZE <- 7.2
+FLOW_LABEL_SIZE <- 8.0
 OUTPUT_STEM <- "figure4_state_space_roadmap_v2"
 
 # Roadmap nodes are slightly wider than tall. RY is converted to npc units so
@@ -210,8 +209,8 @@ MODULE_RX_SCALE <- 1.12
 MODULE_RY_SCALE <- 1.05
 
 # Bounding boxes are c(left, bottom, right, top), in npc units.
-TARGET_CARD_BOX <- c(0.355, 0.322, 0.645, 0.695)
-CONTRIBUTION_STRIP_BOX <- c(0.015, 0.012, 0.985, 0.120)
+TARGET_CARD_BOX <- c(0.335, 0.305, 0.665, 0.680)
+RELATIONSHIP_LEGEND_BOX <- c(0.135, 0.012, 0.865, 0.066)
 
 COL <- list(
   ink = "#111827",
@@ -220,7 +219,6 @@ COL <- list(
   grey_mid = "#9CA3AF",
   grey_light = "#D1D5DB",
   grey_fill = "#F5F7FA",
-  contribution_fill = "#EAF4FB",
   target_fill = "#F5FAFD",
   white = "#FFFFFF",
   training = "#1599A6",
@@ -235,7 +233,7 @@ COL <- list(
   state_d = "#F28A22"
 )
 
-# One row per roadmap component, ordered clockwise.
+# One row per research component, ordered clockwise for layout only.
 #   key       selects the icon branch in draw_module_icon()
 #   x, y      ellipse center in npc units
 #   r         shared base size used to calculate ellipse radii
@@ -249,23 +247,23 @@ modules <- data.frame(
     "physics", "perturbation", "experiment"
   ),
   x = c(0.50, 0.82, 0.82, 0.50, 0.18, 0.18),
-  y = c(0.805, 0.695, 0.435, 0.225, 0.435, 0.695),
-  r = rep(0.095, 6),
+  y = c(0.805, 0.695, 0.425, 0.170, 0.425, 0.695),
+  r = rep(0.102, 6),
   title = c(
-    "Training Data",
-    "Landscape\nBenchmarks",
-    "Prediction\nObjective",
-    "Physics-Based\nModeling",
-    "Perturbation\nModeling",
-    "Experimental\nFeedback"
+    "Training and\nreference data",
+    "Landscape-aware\nbenchmarks",
+    "Ensemble prediction\nobjectives",
+    "Physics-based\nestimation",
+    "Context and\nperturbation\nmodeling",
+    "Orthogonal\nexperimental\nconstraints"
   ),
   subtitle = c(
-    "Multi-state structures\n+ context",
-    "Basin recovery\n+ populations",
-    "Ensembles\n+ uncertainty",
-    "Energetics + transitions",
-    "Mutations + ligands\n+ environment",
-    "Validation\n+ mechanism"
+    "Multi-state structures, trajectories,\nobservables, and conditions",
+    "States, populations, perturbations,\nand kinetics",
+    "Distributions, dynamics,\nand calibrated uncertainty",
+    "Energetic organization and rates\nunder model and sampling\nassumptions",
+    "Mutations, ligands, environment,\nand assembly conditions",
+    "Matched-condition observables\nand independent tests"
   ),
   colour = c(
     COL$training,
@@ -278,7 +276,21 @@ modules <- data.frame(
   stringsAsFactors = FALSE
 )
 
-# One row per clockwise cycle connection.
+# Every component exchanges information with the central inference target.
+# Endpoints stop outside the module ellipses and the central card.
+spokes <- data.frame(
+  module = 1:6,
+  x0 = c(0.500, 0.728, 0.706, 0.500, 0.294, 0.272),
+  y0 = c(0.706, 0.637, 0.425, 0.269, 0.425, 0.637),
+  x1 = c(0.500, 0.665, 0.665, 0.500, 0.335, 0.335),
+  y1 = c(0.680, 0.597, 0.425, 0.305, 0.425, 0.597),
+  colour = modules$colour,
+  stringsAsFactors = FALSE
+)
+
+# Selected outer relationships preserve the useful circular layout while
+# avoiding a mandatory six-step pipeline. `ends = "both"` denotes iterative
+# exchange; `ends = "last"` is retained only for a specific directional claim.
 #   source/target  module IDs for documentation and validation
 #   x0, y0         start of the visible arrow
 #   x1, y1         arrowhead position
@@ -288,21 +300,22 @@ modules <- data.frame(
 links <- data.frame(
   source = 1:6,
   target = c(2, 3, 4, 5, 6, 1),
-  x0 = c(0.601, 0.820, 0.732, 0.412, 0.180, 0.281),
-  y0 = c(0.770, 0.588, 0.374, 0.276, 0.542, 0.730),
-  x1 = c(0.719, 0.820, 0.588, 0.268, 0.180, 0.399),
-  y1 = c(0.730, 0.542, 0.276, 0.374, 0.588, 0.770),
+  x0 = c(0.610, 0.820, 0.735, 0.405, 0.180, 0.290),
+  y0 = c(0.767, 0.580, 0.350, 0.238, 0.540, 0.733),
+  x1 = c(0.710, 0.820, 0.585, 0.265, 0.180, 0.390),
+  y1 = c(0.733, 0.540, 0.238, 0.350, 0.580, 0.767),
   curvature = c(-0.16, 0, -0.15, -0.15, 0, -0.16),
+  ends = c("both", "both", "both", "both", "last", "last"),
   label = c(
-    "state/context\ncases",
-    "recovery\nmetrics",
-    "ensemble\ntargets",
-    "energy/rate\nconstraints",
-    "testable\npredictions",
-    "measured states\n+ populations"
+    "held-out systems\nand conditions",
+    "benchmark results\nand failure modes",
+    "distributional and\ndynamical targets",
+    "energetic and\nkinetic estimates",
+    "testable perturbation\npredictions",
+    "structures, observables,\nconditions + uncertainty"
   ),
-  label_x = c(0.665, 0.945, 0.755, 0.245, 0.055, 0.325),
-  label_y = c(0.820, 0.565, 0.305, 0.305, 0.565, 0.825),
+  label_x = c(0.735, 0.910, 0.770, 0.230, 0.090, 0.265),
+  label_y = c(0.830, 0.560, 0.275, 0.275, 0.560, 0.830),
   colour = modules$colour,
   stringsAsFactors = FALSE
 )
@@ -325,18 +338,27 @@ if (
 }
 
 if (
+  nrow(spokes) != 6 ||
+  any(!spokes$module %in% modules$id)
+) {
+  stop("`spokes` must connect all six modules to the central target.")
+}
+
+if (
   nrow(links) != 6 ||
   any(!links$source %in% modules$id) ||
-  any(!links$target %in% modules$id)
+  any(!links$target %in% modules$id) ||
+  any(!links$ends %in% c("both", "last"))
 ) {
   stop("`links` must define six valid connections between module IDs 1-6.")
 }
 
 layout_values <- c(
   modules$x, modules$y, modules$r,
+  spokes$x0, spokes$y0, spokes$x1, spokes$y1,
   links$x0, links$y0, links$x1, links$y1,
   links$label_x, links$label_y,
-  TARGET_CARD_BOX, CONTRIBUTION_STRIP_BOX
+  TARGET_CARD_BOX, RELATIONSHIP_LEGEND_BOX
 )
 
 if (any(!is.finite(layout_values)) || any(layout_values < 0 | layout_values > 1)) {
@@ -577,10 +599,6 @@ img_state_d <- recolour_image(img_idp1, COL$state_d)
 img_ctd_white <- recolour_image(img_ctd_alpha, COL$white, 0.94)
 img_idp3_white <- recolour_image(img_idp3, COL$white, 0.48)
 
-img_plate <- read_svg_asset(
-  file.path(context_dir, "128WellPlateTop0001_perturbation.svg"),
-  width = 1200
-)
 img_ph <- read_svg_asset(file.path(context_dir, "ph.svg"), width = 900)
 img_ph_white <- recolour_image(img_ph, COL$white, 0.95)
 
@@ -845,9 +863,8 @@ draw_ligand <- function(x, y, col = COL$white, scale = 1) {
 }
 
 draw_experiment_icon <- function(x, y, col = COL$white, scale = 1) {
-  # `scale` changes the test tube and population trace together. The main
-  # Experimental Feedback ellipse and bottom strip deliberately use reduced
-  # scales so neither motif touches its container.
+  # `scale` changes the test tube and population trace together so the motif
+  # can remain comfortably inside its container.
   # Test tube.
   grid.roundrect(
     x = unit(x - 0.025 * scale, "npc"),
@@ -944,40 +961,27 @@ draw_module_base <- function(module) {
     col = NA
   )
 
-  # Number badge.
-  badge_y <- y + ry - 0.018
-  draw_circle(badge_y * 0 + x, badge_y, 0.0175, COL$white, COL$grey_light, 0.8)
-  draw_text(
-    as.character(module$id),
-    x,
-    badge_y,
-    fontsize = 11.5,
-    col = COL$ink,
-    fontface = "bold"
-  )
-
-  multi_title <- grepl("\n", module$title, fixed = TRUE)
-  title_y <- y + if (multi_title) 0.025 else 0.035
-  # Keep a clean gap between the subtitle block and the icon row.
-  subtitle_y <- y - if (multi_title) 0.022 else 0.008
+  title_lines <- length(strsplit(module$title, "\n", fixed = TRUE)[[1]])
+  title_y <- y + if (title_lines > 2) 0.038 else 0.033
+  subtitle_y <- y - 0.014
 
   draw_text(
     module$title,
     x,
     title_y,
-    fontsize = if (multi_title) 11.4 else 12.2,
+    fontsize = if (title_lines > 2) 9.2 else 10.2,
     col = COL$white,
     fontface = "bold",
-    lineheight = 0.91
+    lineheight = 0.90
   )
   draw_text(
     module$subtitle,
     x,
     subtitle_y,
-    fontsize = 8.6,
+    fontsize = 6.8,
     col = COL$white,
     fontface = "bold",
-    lineheight = 0.92
+    lineheight = 0.94
   )
 }
 
@@ -996,13 +1000,7 @@ draw_module_icon <- function(module) {
   # positive y moves up.
   x <- module$x
   key <- module$key
-  y_offset <- if (key == "physics") {
-    0.057
-  } else if (key == "training") {
-    0.062
-  } else {
-    0.068
-  }
+  y_offset <- 0.068
   y <- module$y - y_offset
 
   if (key == "training") {
@@ -1030,7 +1028,7 @@ draw_module_icon <- function(module) {
 
   if (key == "experiment") {
     # Slightly reduced and lifted so both motifs remain comfortably inside the
-    # lower arc of the Experimental Feedback ellipse.
+    # lower arc of the experimental-constraints ellipse.
     draw_experiment_icon(x, y + 0.005, COL$white, scale = 0.78)
   }
 }
@@ -1040,13 +1038,13 @@ draw_module_icon <- function(module) {
 # -----------------------------------------------------------------------------
 
 draw_state_label <- function(label, pop_expr, x, y, col) {
-  draw_text(label, x, y, 8.4, col, "bold")
-  draw_math(pop_expr, x, y - 0.014, 7.4, col, "bold")
+  draw_text(label, x, y, 8.1, col, "bold")
+  draw_math(pop_expr, x, y - 0.014, 7.0, col, "bold")
 }
 
 draw_state_space_card <- function() {
   # The card geometry is controlled by TARGET_CARD_BOX. State coordinates below
-  # are independent of the outer cycle and may be edited without moving modules.
+  # are independent of the outer components and may be edited without moving them.
   card <- TARGET_CARD_BOX
 
   # Shadow and main card.
@@ -1064,45 +1062,51 @@ draw_state_space_card <- function() {
     radius = 0.010
   )
 
-  draw_text("TARGET", 0.50, 0.675, 9.0, COL$ink, "bold")
   draw_text(
-    "Conformational\nState Space",
+    "STATE-SPACE INFERENCE",
     0.50,
-    0.645,
-    12.8,
+    0.653,
+    11.2,
     COL$ink,
-    "bold",
-    lineheight = 0.92
+    "bold"
+  )
+  draw_math(
+    expression(p[eq](X~"|"~S * "," * C) ~~ ";" ~~ K[ij](S * "," * C)),
+    0.50,
+    0.628,
+    8.0,
+    COL$ink_soft
   )
 
   # State centers. Keep labels and transition endpoints synchronized if these
   # coordinates change.
   state <- list(
     A = c(0.500, 0.555),
-    B = c(0.425, 0.485),
-    C = c(0.575, 0.485),
-    D = c(0.500, 0.410)
+    B = c(0.425, 0.492),
+    C = c(0.575, 0.492),
+    D = c(0.500, 0.420)
   )
 
-  # Transition network behind the states. All central transitions deliberately
-  # use the same grey, solid, bidirectional arrow style.
-  draw_arrow(0.484, 0.540, 0.444, 0.501, COL$grey, 1.05, "both", 0.045)
-  draw_arrow(0.516, 0.540, 0.556, 0.501, COL$grey, 1.05, "both", 0.045)
-  draw_arrow(0.500, 0.532, 0.500, 0.433, COL$grey, 1.05, "both", 0.045)
-  draw_arrow(0.450, 0.485, 0.550, 0.485, COL$grey, 0.95, "both", 0.045, 2)
-  draw_arrow(0.444, 0.466, 0.482, 0.426, COL$grey, 1.00, "both", 0.045)
+  # Transition network behind the states. Grey bidirectional arrows avoid a
+  # privileged sequence; the dashed B-C edge denotes an unresolved relationship.
+  draw_arrow(0.484, 0.540, 0.444, 0.508, COL$grey, 1.05, "both", 0.045)
+  draw_arrow(0.516, 0.540, 0.556, 0.508, COL$grey, 1.05, "both", 0.045)
+  draw_arrow(0.500, 0.532, 0.500, 0.443, COL$grey, 1.05, "both", 0.045)
+  draw_arrow(0.450, 0.492, 0.550, 0.492, COL$grey, 0.95, "both", 0.045, 2)
+  draw_arrow(0.444, 0.473, 0.482, 0.436, COL$grey, 1.00, "both", 0.045)
   draw_arrow(
     0.518,
-    0.426,
+    0.436,
     0.556,
-    0.466,
+    0.473,
     COL$grey,
     1.00,
     "both",
     0.045
   )
 
-  # State halos.
+  # Translucent halos make state-support uncertainty visible without implying
+  # that the pictured structures exhaust the accessible conformations.
   draw_circle(state$A[1], state$A[2], 0.027, adjustcolor(COL$state_a, 0.16), NA)
   draw_circle(state$B[1], state$B[2], 0.027, adjustcolor(COL$state_b, 0.16), NA)
   draw_circle(state$C[1], state$C[2], 0.027, adjustcolor(COL$state_c, 0.16), NA)
@@ -1116,48 +1120,49 @@ draw_state_space_card <- function() {
 
   draw_state_label(
     "State A",
-    bquote("(pop. " * p[A] * ")"),
+    bquote("(" * p[A] %+-% sigma[A] * ")"),
     state$A[1],
     0.604,
     COL$state_a
   )
   draw_state_label(
     "State B",
-    bquote("(pop. " * p[B] * ")"),
+    bquote("(" * p[B] %+-% sigma[B] * ")"),
     state$B[1] - 0.010,
-    0.533,
+    0.540,
     COL$state_b
   )
   draw_state_label(
     "State C",
-    bquote("(pop. " * p[C] * ")"),
+    bquote("(" * p[C] %+-% sigma[C] * ")"),
     state$C[1] + 0.010,
-    0.533,
+    0.540,
     COL$state_c
   )
   draw_state_label(
     "State D",
-    bquote("(pop. " * p[D] * ")"),
+    bquote("(" * p[D] %+-% sigma[D] * ")"),
     state$D[1] - 0.075,
-    0.425,
+    0.435,
     COL$state_d
   )
 
   # Output definition.
   bullets <- c(
-    "States (structures)",
-    "Populations",
-    "Transitions / pathways",
-    "Context dependence"
+    "Structural support / accessible states",
+    "Equilibrium populations",
+    "Transitions and rates",
+    "Context dependence",
+    "Uncertainty"
   )
-  ys <- c(0.375, 0.360, 0.345, 0.330)
+  ys <- c(0.382, 0.365, 0.348, 0.331, 0.314)
   for (i in seq_along(bullets)) {
-    draw_circle(0.405, ys[i], 0.0022, COL$ink, NA)
+    draw_circle(0.380, ys[i], 0.0022, COL$ink, NA)
     draw_text(
       bullets[i],
-      0.415,
+      0.390,
       ys[i],
-      8.0,
+      7.7,
       COL$ink,
       "bold",
       just = "left"
@@ -1166,105 +1171,55 @@ draw_state_space_card <- function() {
 }
 
 # -----------------------------------------------------------------------------
-# Bottom contribution strip
+# Compact relationship and uncertainty legend
 # -----------------------------------------------------------------------------
 
-draw_contribution_icon <- function(id, x, y, col) {
-  # IDs follow the clockwise module order:
-  # 1 training, 2 benchmarks, 3 objective, 4 physics, 5 perturbation,
-  # 6 experimental feedback.
-  if (id == 1) {
-    draw_image(img_plate, x, y, 0.034, 0.027)
-  }
-  if (id == 2) {
-    draw_target_icon(x, y, col, scale = 1.15)
-  }
-  if (id == 3) {
-    draw_density_curve(x, y, 0.036, 0.032, col, 1.15)
-    for (dx in c(-0.010, 0, 0.010)) {
-      draw_circle(x + dx, y + 0.006, 0.0025, adjustcolor(col, 0.55), NA)
-    }
-  }
-  if (id == 4) {
-    draw_energy_curve(x, y, 0.048, 0.034, col, label_mode = "delta_g")
-  }
-  if (id == 5) {
-    draw_ligand(x, y, col, 0.82)
-    draw_circle(x - 0.017, y + 0.016, 0.0038, fill = NA, col = col, lwd = 1)
-    draw_circle(x + 0.017, y - 0.016, 0.0038, fill = NA, col = col, lwd = 1)
-  }
-  if (id == 6) {
-    # A simple test-tube + population trace reads more clearly at publication
-    # size than the detailed NMR instrument artwork used in early drafts.
-    draw_experiment_icon(x, y, col, scale = 0.78)
-  }
-}
-
-draw_contribution_strip <- function() {
-  # The bottom strip is a compact summary, not a second legend. Keep phrases
-  # short enough to remain readable at final publication width.
-  strip <- CONTRIBUTION_STRIP_BOX
+draw_relationship_legend <- function() {
+  box <- RELATIONSHIP_LEGEND_BOX
   draw_roundrect(
-    strip,
-    fill = COL$contribution_fill,
-    col = COL$grey_mid,
-    lwd = 0.8,
-    radius = 0.008
+    box,
+    fill = COL$grey_fill,
+    col = COL$grey_light,
+    lwd = 0.75,
+    radius = 0.006
   )
 
-  first_right <- 0.145
+  draw_arrow(0.155, 0.039, 0.195, 0.039, COL$grey, 1.2, "both", 0.045)
   draw_text(
-    "What each\ncomponent\ncontributes",
-    0.076,
-    0.067,
-    7.7,
+    "iterative exchange",
+    0.205,
+    0.039,
+    7.2,
     COL$ink_soft,
     "bold",
-    lineheight = 0.94
+    just = "left"
+  )
+
+  draw_arrow(0.370, 0.039, 0.410, 0.039, COL$grey, 1.2, "last", 0.045)
+  draw_text(
+    "specific directional influence",
+    0.420,
+    0.039,
+    7.2,
+    COL$ink_soft,
+    "bold",
+    just = "left"
   )
 
   grid.lines(
-    x = unit(c(first_right, first_right), "npc"),
-    y = unit(c(0.020, 0.113), "npc"),
-    gp = gpar(col = COL$grey_light, lwd = 0.8)
+    x = unit(c(0.650, 0.690), "npc"),
+    y = unit(c(0.039, 0.039), "npc"),
+    gp = gpar(col = COL$grey, lwd = 1.2, lty = 2)
   )
-
-  contribution_text <- c(
-    "Diverse states /\ncontexts",
-    "State / population\nrecovery",
-    "Calibrated\nensembles",
-    "Energetic / kinetic\nplausibility",
-    "Perturbation\ngeneralization",
-    "Empirical populations\n+ mechanisms"
+  draw_text(
+    "conditional / unresolved",
+    0.700,
+    0.039,
+    7.2,
+    COL$ink_soft,
+    "bold",
+    just = "left"
   )
-
-  cell_w <- (strip[3] - first_right) / 6
-  for (i in 1:6) {
-    left <- first_right + (i - 1) * cell_w
-    right <- left + cell_w
-
-    if (i > 1) {
-      grid.lines(
-        x = unit(c(left, left), "npc"),
-        y = unit(c(0.020, 0.113), "npc"),
-        gp = gpar(col = COL$grey_light, lwd = 0.75)
-      )
-    }
-
-    icon_x <- (left + right) / 2
-    text_x <- icon_x
-    draw_contribution_icon(i, icon_x, 0.092, modules$colour[i])
-    draw_text(
-      contribution_text[i],
-      text_x,
-      0.044,
-      CONTRIBUTION_TEXT_SIZE,
-      COL$ink,
-      "bold",
-      just = "centre",
-      lineheight = 0.98
-    )
-  }
 }
 
 # -----------------------------------------------------------------------------
@@ -1277,23 +1232,26 @@ draw_figure <- function() {
 
   # Title block.
   draw_text(
-    "Toward State-Space Protein Structure Prediction",
+    "Proposed framework for conformational state-space inference",
     0.50,
     0.968,
-    18.0,
+    16.2,
     COL$ink,
     "bold"
   )
   draw_text(
-    "A roadmap for recovering the conformational state space",
+    paste(
+      "An iterative research program integrating data, prediction,",
+      "physics, perturbation, and experiment"
+    ),
     0.50,
     0.935,
-    11.8,
+    10.5,
     COL$ink_soft,
     "italic"
   )
 
-  # Draw the cycle arrows first so their endpoints sit behind the nodes.
+  # Draw selected outer feedback links first so endpoints sit behind nodes.
   for (i in seq_len(nrow(links))) {
     link <- links[i, ]
     if (link$curvature == 0) {
@@ -1303,9 +1261,9 @@ draw_figure <- function() {
         link$x1,
         link$y1,
         link$colour,
-        lwd = 5.8,
-        ends = "last",
-        length_in = 0.165
+        lwd = 3.2,
+        ends = link$ends,
+        length_in = 0.090
       )
     } else {
       draw_curve_arrow(
@@ -1315,24 +1273,40 @@ draw_figure <- function() {
         link$y1,
         link$curvature,
         link$colour,
-        lwd = 4.5,
-        ends = "last",
-        length_in = 0.135
+        lwd = 3.2,
+        ends = link$ends,
+        length_in = 0.090
       )
     }
+  }
+
+  # Bidirectional spokes are the primary relationship structure: each research
+  # component both informs and is refined by state-space inference.
+  for (i in seq_len(nrow(spokes))) {
+    spoke <- spokes[i, ]
+    draw_arrow(
+      spoke$x0,
+      spoke$y0,
+      spoke$x1,
+      spoke$y1,
+      spoke$colour,
+      lwd = 2.6,
+      ends = "both",
+      length_in = 0.075
+    )
   }
 
   # Central target.
   draw_state_space_card()
 
-  # Six roadmap components.
+  # Six interacting research components.
   for (i in seq_len(nrow(modules))) {
     module <- modules[i, ]
     draw_module_base(module)
     draw_module_icon(module)
   }
 
-  # Data-flow labels stay on top and remain readable near the central card.
+  # Relationship labels stay on top and remain readable near the central card.
   for (i in seq_len(nrow(links))) {
     link <- links[i, ]
     draw_text(
@@ -1346,8 +1320,7 @@ draw_figure <- function() {
     )
   }
 
-  # Contribution summary.
-  draw_contribution_strip()
+  draw_relationship_legend()
 }
 
 # -----------------------------------------------------------------------------
